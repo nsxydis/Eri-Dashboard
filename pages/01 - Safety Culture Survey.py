@@ -29,8 +29,7 @@ def main():
     # Page options
     with st.sidebar:
         # Chart Options
-        st.write("# Filter Options")
-        st.multiselect("Fields", options = ss.df.columns, key = 'fields')
+        st.multiselect("Filter Fields", options = ss.df.columns, key = 'fields')
 
         # For each field, give options to filter by
         for n in range(len(ss["fields"])):
@@ -42,22 +41,41 @@ def main():
             
         # TODO: Secondary Plots
 
+
+    # Stop if we don't have a primary field
+    if not ss.primaryField:
+        st.write("Select a Primary Breakdown Field first")
+        return 1
+
     # Make a copy of the data
-    df = ss.df.copy()
+    df = ss.df.clone()
 
     # Start subsetting...
     for n in range(len(ss.fields)):
+        # Skip if nothing was selected for a field
+        if len(ss[f"fieldFilter{n}"]) == 0:
+            continue
+
+        # Otherwise get the field and filter the data
         field = ss.fields[n]
         df = df.filter(pl.col(field).is_in(ss[f"fieldFilter{n}"]))
     
-    # Make the charts
-    primary = alt.Chart(df.to_pandas()).mark_arc().encode(
-        x = ss.primaryField,
+    # Selection tool
+    selection = alt.select_point(fields = [ss.primaryField])
+    
+    # Make the primary Chart
+    title = f"Distribution of {ss.primaryField}"
+    primary = alt.Chart(df.to_pandas(), title = title).mark_arc().encode(
+        angle = "count()",
         color = f"{ss.primaryField}:N"
-    )
+    ).add_params(selection)
+
+    # Make the secondary plot (if we want one)
+    
+
 
     # Plot
-    st.altair_chart(primary)
+    st.altair_chart(primary, theme = None)
 
 
 
