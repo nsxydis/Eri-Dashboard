@@ -46,7 +46,6 @@ def main():
             secondaryColumns = ['None'] + secondaryColumns
             st.selectbox("Secondary Breakdown Field", options = secondaryColumns, key = 'secondaryField')
 
-
     # Stop if we don't have a primary field
     if not ss.primaryField:
         st.write("Select a Primary Breakdown Field first")
@@ -66,7 +65,7 @@ def main():
         df = df.filter(pl.col(field).is_in(ss[f"fieldFilter{n}"]))
 
     # Chart header
-    if ss.secondaryField != "None":
+    if ss.secondaryField and ss.secondaryField != "None":
         st.write("# Click on the pie chart to change the secondary chart")
         st.write(f"You can select multiple {ss.primaryField} values by holding shift when you click")
     
@@ -81,7 +80,7 @@ def main():
     ).add_params(selection)
 
     # Make the secondary plot (if we want one)
-    if ss.secondaryField != "None":
+    if ss.secondaryField and ss.secondaryField != "None":
         title = f"Distribution of {ss.secondaryField}"
         secondary = alt.Chart(df.to_pandas(), title = title).mark_bar().encode(
             x = f"{ss.secondaryField}:N",
@@ -94,14 +93,13 @@ def main():
         ).transform_filter(selection)
 
     # Plot
-    if ss.secondaryField == 'None':
+    if not ss.secondaryField or ss.secondaryField == 'None':
         st.altair_chart(primary, theme = None)
     else:
         chart = primary | secondary
         st.altair_chart(chart.resolve_scale(color = 'independent'), theme = None)
 
-    # Debugging
-    st.write(ss)
+
 
 if __name__ == '__main__':
     main()
