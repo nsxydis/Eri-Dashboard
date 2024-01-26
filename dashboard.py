@@ -18,7 +18,7 @@ def main():
     if upload is not None:
         df = pl.read_csv(upload, infer_schema_length=None)
 
-        st.write("# Dataframe")
+        st.write("# Uploaded Dataframe")
         st.dataframe(df)
 
     # Example chart
@@ -27,6 +27,7 @@ def main():
             x = 'a',
             y = 'c'
         )
+    st.write("# Chart Demonstration")
     st.altair_chart(chart)
 
 if __name__ == "__main__":
