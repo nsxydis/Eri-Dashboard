@@ -8,10 +8,32 @@ def main():
     if ph.init() != 0:
         return
 
-    # 
-    # st.write(st.session_state)
-    
-    # Read in the data
+    # Shorthand
+    ss = st.session_state
+
+    # Debugging...
+    st.write(ss)
+
+    # Option initializaton
+    init = {
+        'numCharts' : 1
+    }
+
+    # Initialize the options
+    for item in init:
+        if item not in ss:
+            ss[item] = init[item]
+
+    # Page options
+    with st.sidebar:
+        # Number of graphs -- TODO: Default to 1 for now
+        # st.number_input("Number of Charts", value = ss.numCharts, min_value = 1, step = 1, key = 'numCharts')
+        ss.numCharts = 1
+
+        # Chart Options
+        for n in range(ss.numCharts):
+            st.write("# Filter Options")
+            st.multiselect("Fields", options = ss.df.columns, key = f'fields{n}')
 
 if __name__ == '__main__':
     main()
