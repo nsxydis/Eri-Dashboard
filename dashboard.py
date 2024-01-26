@@ -12,7 +12,7 @@ import polars as pl
 import altair as alt
 
 def main():
-    upload = st.file_uploader("Upload a file (200MB Limit)")
+    upload = st.file_uploader("Upload a file")
 
     # If we have a file, display it
     if upload is not None:
