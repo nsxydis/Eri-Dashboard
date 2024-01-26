@@ -8,9 +8,23 @@ Version 1.0 - Programmer: Nick Xydis
 '''
 
 import streamlit as st
+import polars as pl
+import altair as alt
 
 def main():
-    st.write("Hello World")
+    upload = st.file_uploader("Upload a file (200MB Limit)")
+
+    # If we have a file, display it
+    if upload is not None:
+        df = pl.read_csv(upload, infer_schema_length=None)
+
+        chart = alt.Chart(df.to_pandas()).mark_line().encode(
+            x = 'a',
+            y = 'c'
+        )
+
+        st.altair_chart(chart)
+
 
 if __name__ == "__main__":
     main()
