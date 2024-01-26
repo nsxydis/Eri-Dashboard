@@ -4,7 +4,11 @@ import altair as alt
 import pageHelper as ph
 
 def main():
-    ph.init()
+    # Page initialization, stop on error
+    if ph.init() != 0:
+        return
+
+    # 
     # st.write(st.session_state)
     
     # Read in the data
