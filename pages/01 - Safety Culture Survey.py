@@ -37,20 +37,24 @@ def main():
             st.multiselect(f"Filter {item}", options = ss.df[item].unique().to_list(), key = f'fieldFilter{n}')
 
         # Field to separate by
-        st.selectbox("Primary Breakdown Field", options = ss.df.columns, key = 'primaryField')
+        fields = ["None"] + ss.df.columns.copy()
+        st.selectbox("Primary Breakdown Field", options = fields, key = 'primaryField')
             
         # Secondary Plots
         if ss.primaryField:      
-            secondaryColumns = ss.df.columns.copy()
-            secondaryColumns.remove(ss.primaryField)
-            secondaryColumns = ['None'] + secondaryColumns
-            st.selectbox("Secondary Breakdown Field", options = secondaryColumns, key = 'secondaryField')
+            secondaryFields = fields.copy()
+            if ss.primaryField != "None":
+                secondaryFields.remove(ss.primaryField)
+            st.selectbox("Secondary Breakdown Field", options = secondaryFields, key = 'secondaryField')
+
+        # Divider
+        st.markdown('''---''')
 
     # Stop if we don't have a primary field
-    if not ss.primaryField:
+    if not ss.primaryField or ss.primaryField == 'None':
         st.write("Select a Primary Breakdown Field first")
         return 1
-
+    
     # Make a copy of the data
     df = ss.df.clone()
 
@@ -92,14 +96,12 @@ def main():
             ]
         ).transform_filter(selection)
 
-    # Plot
+    # Plot primary secondary plots...
     if not ss.secondaryField or ss.secondaryField == 'None':
         st.altair_chart(primary, theme = None)
     else:
         chart = primary | secondary
         st.altair_chart(chart.resolve_scale(color = 'independent'), theme = None)
-
-
 
 if __name__ == '__main__':
     main()
