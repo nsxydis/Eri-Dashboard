@@ -64,6 +64,11 @@ def main():
         # Otherwise get the field and filter the data
         field = ss.fields[n]
         df = df.filter(pl.col(field).is_in(ss[f"fieldFilter{n}"]))
+
+    # Chart header
+    if ss.secondaryField != "None":
+        st.write("# Click on the pie chart to change the secondary chart")
+        st.write(f"You can select multiple {ss.primaryField} values by holding shift when you click")
     
     # Selection tool
     selection = alt.selection_point(fields = [ss.primaryField])
@@ -77,10 +82,15 @@ def main():
 
     # Make the secondary plot (if we want one)
     if ss.secondaryField != "None":
-        secondary = alt.Chart(df.to_pandas()).mark_bar().encode(
+        title = f"Distribution of {ss.secondaryField}"
+        secondary = alt.Chart(df.to_pandas(), title = title).mark_bar().encode(
             x = f"{ss.secondaryField}:N",
             y = "count()",
-            color = f"{ss.secondaryField}:N"
+            color = f"{ss.secondaryField}:N",
+            tooltip = [
+                ss.secondaryField,
+                'count()'
+            ]
         ).transform_filter(selection)
 
     # Plot
@@ -88,10 +98,10 @@ def main():
         st.altair_chart(primary, theme = None)
     else:
         chart = primary | secondary
-        chart.resolve_scale(color = 'independent')
-        st.altair_chart(chart, theme = None)
+        st.altair_chart(chart.resolve_scale(color = 'independent'), theme = None)
 
-
+    # Debugging
+    st.write(ss)
 
 if __name__ == '__main__':
     main()
