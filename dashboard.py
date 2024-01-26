@@ -10,25 +10,26 @@ Version 1.0 - Programmer: Nick Xydis
 import streamlit as st
 import polars as pl
 import altair as alt
+import os
 
 def main():
-    upload = st.file_uploader("Upload a file")
+    # Initialize
+    st.session_state.upload = None
+    st.session_state.failure = None
 
-    # If we have a file, display it
-    if upload is not None:
-        df = pl.read_csv(upload, infer_schema_length=None)
+    # Upload a file
+    st.session_state.upload = st.file_uploader("Upload a file")
 
-        st.write("# Uploaded Dataframe")
-        st.dataframe(df)
+    if st.session_state.upload and not st.session_state.failure:
+        # Try to read in the data
+        try:
+            df = pl.read_csv(st.session_state.upload)
+        except:
+            st.session_state.failure = True
+            st.write("Could not read uploaded file!")
+            st.write("Please refresh the page and try again.")
 
-    # Example chart
-    dfDemo = pl.read_csv('demo.csv')
-    chart = alt.Chart(dfDemo.to_pandas()).mark_line().encode(
-            x = 'a',
-            y = 'c'
-        )
-    st.write("# Chart Demonstration")
-    st.altair_chart(chart)
+    # How to use this app details below...
 
 if __name__ == "__main__":
     main()

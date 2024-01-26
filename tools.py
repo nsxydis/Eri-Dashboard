@@ -11,4 +11,5 @@ pl.DataFrame({
     'b' : [n*2 for n in range(length)],
     'c' : [n**2 for n in range(length)],
     'd' : [n**3 for n in range(length)]
-}).write_csv('demo.csv')
+}).write_csv('.\\data\\demo.csv')
+
