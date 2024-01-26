@@ -41,7 +41,9 @@ def main():
             
         # Secondary Plots
         if ss.primaryField:      
-            secondaryColumns = ss.df.columns.copy().remove(ss.primaryField)
+            secondaryColumns = ss.df.columns.copy()
+            secondaryColumns.remove(ss.primaryField)
+            secondaryColumns = ['None'] + secondaryColumns
             st.selectbox("Secondary Breakdown Field", options = secondaryColumns, key = 'secondaryField')
 
 
@@ -74,11 +76,20 @@ def main():
     ).add_params(selection)
 
     # Make the secondary plot (if we want one)
-
-
+    if ss.secondaryField != "None":
+        secondary = alt.Chart(df.to_pandas()).mark_bar().encode(
+            x = ss.secondaryField,
+            y = "count()",
+            color = f"{ss.secondaryField}:N"
+        )
 
     # Plot
-    st.altair_chart(primary, theme = None)
+    if ss.secondaryField == 'None':
+        st.altair_chart(primary, theme = None)
+    else:
+        chart = primary | secondary
+        chart.resolve_scale(color = 'independent')
+        st.altair_chart(chart, theme = None)
 
 
 
