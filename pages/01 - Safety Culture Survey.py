@@ -78,10 +78,10 @@ def main():
     # Make the secondary plot (if we want one)
     if ss.secondaryField != "None":
         secondary = alt.Chart(df.to_pandas()).mark_bar().encode(
-            x = ss.secondaryField,
+            x = f"{ss.secondaryField}:N",
             y = "count()",
             color = f"{ss.secondaryField}:N"
-        )
+        ).transform_filter(selection)
 
     # Plot
     if ss.secondaryField == 'None':
