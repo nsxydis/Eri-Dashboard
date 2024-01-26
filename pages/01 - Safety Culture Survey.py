@@ -35,5 +35,12 @@ def main():
             st.write("# Filter Options")
             st.multiselect("Fields", options = ss.df.columns, key = f'fields{n}')
 
+            # For each field, give options to filter by
+            for i in range(len(ss[f"fields{n}"])):
+                item = ss[f'fields{n}']
+                st.write(f"Filter {item}")
+                st.multiselect(item, options = ss.df[item].unique().to_list(), key = f'field{n}Filter{i}')
+
+
 if __name__ == '__main__':
     main()
