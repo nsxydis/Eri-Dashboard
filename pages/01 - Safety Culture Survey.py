@@ -39,7 +39,10 @@ def main():
         # Field to separate by
         st.selectbox("Primary Breakdown Field", options = ss.df.columns, key = 'primaryField')
             
-        # TODO: Secondary Plots
+        # Secondary Plots
+        if ss.primaryField:      
+            secondaryColumns = ss.df.columns.copy().remove(ss.primaryField)
+            st.selectbox("Secondary Breakdown Field", options = secondaryColumns, key = 'secondaryField')
 
 
     # Stop if we don't have a primary field
@@ -61,7 +64,7 @@ def main():
         df = df.filter(pl.col(field).is_in(ss[f"fieldFilter{n}"]))
     
     # Selection tool
-    selection = alt.select_point(fields = [ss.primaryField])
+    selection = alt.selection_point(fields = [ss.primaryField])
     
     # Make the primary Chart
     title = f"Distribution of {ss.primaryField}"
@@ -71,7 +74,7 @@ def main():
     ).add_params(selection)
 
     # Make the secondary plot (if we want one)
-    
+
 
 
     # Plot
