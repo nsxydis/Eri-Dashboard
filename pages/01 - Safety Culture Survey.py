@@ -21,6 +21,20 @@ def main():
         'secondaryField'    : None
     }
 
+    # TODO: Fix where the fullscreen button appears
+    style_fullscreen_button_css = """
+    button[title="View fullscreen"] {
+        right: 0;
+        position: relative;
+    }
+    """
+    st.markdown(
+        "<style>"
+        + style_fullscreen_button_css
+        + "</styles>",
+        unsafe_allow_html=True,
+    )
+
     # Initialize the options
     for item in init:
         if item not in ss:
