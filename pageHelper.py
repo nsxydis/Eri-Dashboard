@@ -8,7 +8,7 @@ def init():
         return 1
 
     # If there isn't a file uploaded yet...
-    elif st.session_state.upload == None:
+    elif st.session_state.upload == None and 'df' not in st.session_state:
         st.write("You'll need to upload a csv file to continue!")
         return 2
 
