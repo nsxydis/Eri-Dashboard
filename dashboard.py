@@ -13,17 +13,22 @@ import altair as alt
 import os
 
 def main():
-    # Initialize
-    st.session_state.upload = None
-    st.session_state.failure = None
+    # Debugging...
+    st.write(st.session_state)
 
+    # Initialize failure
+    if 'failure' not in st.session_state:
+        st.session_state.failure = False
+    
     # Upload a file
-    st.session_state.upload = st.file_uploader("Upload a file")
+    st.file_uploader("Upload a file", key = 'upload')
 
     if st.session_state.upload and not st.session_state.failure:
         # Try to read in the data
         try:
             df = pl.read_csv(st.session_state.upload)
+            st.session_state.df = df
+            st.write("File read in succesfully!")
         except:
             st.session_state.failure = True
             st.write("Could not read uploaded file!")

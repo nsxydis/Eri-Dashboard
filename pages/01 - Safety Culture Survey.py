@@ -1,11 +1,11 @@
 import streamlit as st
 import polars as pl
 import altair as alt
+import pageHelper as ph
 
 def main():
-    # Wait until there is data to display
-    if not st.session_state.upload:
-        return
+    ph.init()
+    # st.write(st.session_state)
     
     # Read in the data
 
