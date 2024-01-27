@@ -38,7 +38,10 @@ def main():
             
     # Each page needs this for the session state to persist
     for k, v in st.session_state.items():
-        st.session_state[k] = v
+        try:
+            st.session_state[k] = v
+        except:
+            pass
 
 if __name__ == "__main__":
     main()
