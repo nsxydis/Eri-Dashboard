@@ -151,8 +151,5 @@ def main():
         chart = primary | (secondary + full) | pctSecondary
         st.altair_chart(chart.resolve_scale(color = 'independent'), theme = None)
 
-    # TEMP
-    st.write(selection.to_dict())
-
 if __name__ == '__main__':
     main()
