@@ -35,9 +35,10 @@ def main():
             st.write("Please refresh the page and try again.")
 
     # How to use this app details below...
-
-if __name__ == "__main__":
-    main()
+            
     # Each page needs this for the session state to persist
     for k, v in st.session_state.items():
         st.session_state[k] = v
+
+if __name__ == "__main__":
+    main()

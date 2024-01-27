@@ -157,9 +157,9 @@ def main():
         chart = primary | (secondary + full) | pctSecondary
         st.altair_chart(chart.resolve_scale(color = 'independent'), theme = None)
 
-if __name__ == '__main__':
-    main()
-
     # Each page needs this for the session state to persist
     for k, v in st.session_state.items():
         st.session_state[k] = v
+
+if __name__ == '__main__':
+    main()
