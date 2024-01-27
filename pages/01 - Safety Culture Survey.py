@@ -85,6 +85,7 @@ def main():
         st.write("# Click on the pie chart to change the secondary chart")
         st.write(f"You can select multiple {ss.primaryField} values by holding shift when you click")
         st.write("Click just outside the pie chart to remove your selection")
+        st.write("At the top left of the chart area is a button to expand the chart to fullscreen mode (recommended)")
     
     # Selection tool
     selection = alt.selection_point(fields = [ss.primaryField], encodings = ['color'])
