@@ -18,20 +18,6 @@ def main():
     # Debugging...
     # st.write(ss)
 
-    # TODO: Fix where the fullscreen button appears
-    style_fullscreen_button_css = """
-    button[title="View fullscreen"] {
-        right: 0;
-        position: relative;
-    }
-    """
-    st.markdown(
-        "<style>"
-        + style_fullscreen_button_css
-        + "</styles>",
-        unsafe_allow_html=True,
-    )
-
     # Page options
     with st.sidebar:
         # Heading
@@ -54,35 +40,15 @@ def main():
 
         # Filters
         st.markdown("---") # Horizontal Line
-        st.write('# Filtering Data')
-        key = 'fields'
-        ph.ss(key, [])
-        st.multiselect("Filter Fields", options = ss.df.columns, key = key, default=ss[key])
-
-        # For each field, give options to filter by
-        for n in range(len(ss["fields"])):
-            item = ss[f'fields'][n]
-            key = f'fieldFilter{n}'
-            ph.ss(key, [])
-            st.multiselect(f"Filter {item}", options = ss.df[item].unique().to_list(), key = key, default = ss[key])
+        ph.filter()
 
     # Stop if we don't have a primary field
     if not ss.primaryField or ss.primaryField == "None":
         st.write("Select a Primary Breakdown Field first")
         return 1
-
-    # Make a copy of the data
-    df = ss.df.clone()
-
-    # Start subsetting...
-    for n in range(len(ss.fields)):
-        # Skip if nothing was selected for a field
-        if len(ss[f"fieldFilter{n}"]) == 0:
-            continue
-
-        # Otherwise get the field and filter the data
-        field = ss.fields[n]
-        df = df.filter(pl.col(field).is_in(ss[f"fieldFilter{n}"]))
+    
+    # Filter the dataframe
+    df = ph.filterDataframe()
 
     # Chart header
     if ss.secondaryField and ss.secondaryField != "None":
@@ -93,10 +59,6 @@ def main():
     
     # Selection tool
     selection = alt.selection_point(fields = [ss.primaryField], encodings = ['color'])
-    
-    # Allows tooltips to work when in fullscreen mode
-    st.markdown('<style>#vg-tooltip-element{z-index: 1000051}</style>',
-        unsafe_allow_html=True)
 
     # Make the primary Chart
     title = f"Distribution of {ss.primaryField}"
@@ -159,3 +121,9 @@ def main():
 
 if __name__ == '__main__':
     main()
+    # Each page needs this for the session state to persist
+    for k, v in st.session_state.items():
+        try:
+            st.session_state[k] = v
+        except:
+            pass
