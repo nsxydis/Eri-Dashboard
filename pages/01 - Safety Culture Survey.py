@@ -3,6 +3,10 @@ import polars as pl
 import altair as alt
 import pageHelper as ph
 
+# Suppress Error reporting
+from streamlit.elements.utils import _shown_default_value_warning
+_shown_default_value_warning = False
+
 def main():
     # Page initialization, stop on error
     if ph.init() != 0:
