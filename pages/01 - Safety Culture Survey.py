@@ -14,13 +14,6 @@ def main():
     # Debugging...
     # st.write(ss)
 
-    # Option initializaton
-    init = {
-        'numCharts'         : 1,
-        'primaryField'      : None,
-        'secondaryField'    : None
-    }
-
     # TODO: Fix where the fullscreen button appears
     style_fullscreen_button_css = """
     button[title="View fullscreen"] {
@@ -35,33 +28,42 @@ def main():
         unsafe_allow_html=True,
     )
 
-    # Initialize the options
-    for item in init:
-        if item not in ss:
-            ss[item] = init[item]
-
     # Page options
     with st.sidebar:
-        # Chart Options
-        st.multiselect("Filter Fields", options = ss.df.columns, key = 'fields')
+        # Heading
+        st.write('# Plotting Data')
+        # Field to separate by
+        key = 'primaryField'
+        ph.ss(key, "None")
+        primaryColumns = ["None"] + ss.df.columns.copy()
+        st.selectbox("Primary Breakdown Field", options = primaryColumns, key = key, index = primaryColumns.index(ss[key]))
+            
+        # Secondary Plots
+        if ss.primaryField:
+            secondaryColumns = ss.df.columns.copy()
+            if ss.primaryField != "None":
+                secondaryColumns.remove(ss.primaryField)
+            secondaryColumns = ['None'] + secondaryColumns
+            key = 'secondaryField'
+            ph.ss(key, "None")
+            st.selectbox("Secondary Breakdown Field", options = secondaryColumns, key = 'secondaryField', index = secondaryColumns.index(ss[key]))
+
+        # Filters
+        st.markdown("---") # Horizontal Line
+        st.write('# Filtering Data')
+        key = 'fields'
+        ph.ss(key, [])
+        st.multiselect("Filter Fields", options = ss.df.columns, key = key, default=ss[key])
 
         # For each field, give options to filter by
         for n in range(len(ss["fields"])):
             item = ss[f'fields'][n]
-            st.multiselect(f"Filter {item}", options = ss.df[item].unique().to_list(), key = f'fieldFilter{n}')
-
-        # Field to separate by
-        st.selectbox("Primary Breakdown Field", options = ss.df.columns, key = 'primaryField')
-            
-        # Secondary Plots
-        if ss.primaryField:      
-            secondaryColumns = ss.df.columns.copy()
-            secondaryColumns.remove(ss.primaryField)
-            secondaryColumns = ['None'] + secondaryColumns
-            st.selectbox("Secondary Breakdown Field", options = secondaryColumns, key = 'secondaryField')
+            key = f'fieldFilter{n}'
+            ph.ss(key, [])
+            st.multiselect(f"Filter {item}", options = ss.df[item].unique().to_list(), key = key, default = ss[key])
 
     # Stop if we don't have a primary field
-    if not ss.primaryField:
+    if not ss.primaryField or ss.primaryField == "None":
         st.write("Select a Primary Breakdown Field first")
         return 1
 
@@ -149,6 +151,8 @@ def main():
         chart = primary | (secondary + full) | pctSecondary
         st.altair_chart(chart.resolve_scale(color = 'independent'), theme = None)
 
+    # TEMP
+    st.write(selection.to_dict())
 
 if __name__ == '__main__':
     main()
