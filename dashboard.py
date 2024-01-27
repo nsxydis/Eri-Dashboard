@@ -27,6 +27,11 @@ def main():
         # Try to read in the data
         try:
             df = pl.read_csv(st.session_state.upload)
+
+            # Update the columns
+            df.columns = [
+                col.replace('.', "_").replace(' ', '_') for col in df.columns
+            ]
             st.session_state.df = df
             st.write("File read in succesfully!")
         except:
