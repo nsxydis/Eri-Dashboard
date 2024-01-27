@@ -84,6 +84,7 @@ def main():
     if ss.secondaryField and ss.secondaryField != "None":
         st.write("# Click on the pie chart to change the secondary chart")
         st.write(f"You can select multiple {ss.primaryField} values by holding shift when you click")
+        st.write("Click just outside the pie chart to remove your selection")
     
     # Selection tool
     selection = alt.selection_point(fields = [ss.primaryField], encodings = ['color'])
