@@ -1,6 +1,10 @@
 import streamlit as st
 import polars as pl
 
+# Suppress Error reporting
+from streamlit.elements.utils import _shown_default_value_warning
+_shown_default_value_warning = True
+
 def init():
     '''Default start for all pages'''
     # If we haven't used the dashboard page yet...
