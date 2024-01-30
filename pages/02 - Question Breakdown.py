@@ -46,7 +46,7 @@ def main():
 
             # Filters
             st.markdown("---") # Horizontal Line
-            ph.filter(i)
+            # ph.filter(i)
 
     # Filter the dataframe
     df = ph.filterDataframe()

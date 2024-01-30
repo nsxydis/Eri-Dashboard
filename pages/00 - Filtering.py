@@ -7,30 +7,58 @@ import polars as pl
 import pageHelper as ph
 
 def main():
-    st.slider("Groups to plot", 1, 5, key = 'numGroups')
+    # Page initialization, stop on error
+    if ph.init() != 0:
+        return
+    
+    # Shorthand
+    ss = st.session_state
+    
+    # Number of groups we want to filter and plot
+    ph.ss('numGroups', 1)
+    st.slider("Groups to plot", 1, 5, key = 'numGroups', value = ss['numGroups'])
 
-    for i in range(1, ss.numGroups + 1):
-        # Headings
-        st.markdown("###")
-        st.write(f"# Group {i}")
-        st.markdown("###")
-        
-        # Dataframe filtering
-        filter(i)
+    # Fields we want to filter for each group
+    fieldKey = 'fields'
+    ph.ss(fieldKey, [])
+    st.multiselect("Filter Fields", options = ss.df.columns, key = fieldKey, default = ss[fieldKey])
+    
+    # Stop if we don't have anything to filter
+    if len(st.session_state[fieldKey]) == 0:
+        st.markdown("---")
+        st.write("Select fields to filter by!")
+        return 1
+    
+    # Filter form
+    with st.form("filterGroups"):
+        st.form_submit_button("Apply Groupings!")
+        st.markdown("---")
+        for i in range(1, ss.numGroups + 1):
+            # Headings
+            st.write(f"# Group {i}")
+            st.markdown("###")
+
+            # Make a groupDict, if needed
+            ph.ss(f'groupDict{i}', {})
+            
+            # Dataframe filtering
+            filter(i)
+            st.markdown("---")
 
 def filter(i):
-    '''Code to write the data filter options on the sidebar''' 
-    st.write('# Filtering Data')
-    fieldKey = f'fields{i}'
-    ph.ss(fieldKey, [])
-    st.multiselect("Filter Fields", options = st.session_state.df.columns, key = fieldKey, default=st.session_state[fieldKey])
+    '''Code to write the data filter options on the sidebar'''
+    ss = st.session_state
+    dictionary = ss[f"groupDict{i}"]
+    
+    # Add the keys to our dictionary
+    for field in ss.fields:
+        if field not in dictionary:
+            dictionary[field] = []
 
-    # For each field, give options to filter by
-    for n in range(len(st.session_state[fieldKey])):
-        item = st.session_state[fieldKey][n]
-        key = f'field{i}Filter{n}'
-        ph.ss(key, [])
-        st.multiselect(f"Filter {item}", options = st.session_state.df[item].unique().to_list(), key = key, default = st.session_state[key])
+    # Filter options
+    for key in ss.fields:
+        values = st.multiselect(f"Filter {key}", options = ss.df[key].unique().to_list(), key = f'jambox{key}{i}', default = dictionary[key])
+        dictionary[key] = values
 
 if __name__ == '__main__':
     main()

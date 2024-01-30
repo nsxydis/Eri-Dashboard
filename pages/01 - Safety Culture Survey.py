@@ -20,8 +20,6 @@ def main():
 
     # Page options
     with st.sidebar:
-        st.slider("Groups to plot", 1, 5, key = 'numGroups')
-
         for i in range(1, ss.numGroups + 1):
             # Headings
             st.markdown("###")
@@ -71,14 +69,14 @@ def mainChart(i):
     st.write(f"# Group {i}")
 
     # Display data filters
-    fields = ss[f"fields{i}"]
+    fields = ss[f"fields"]
     if len(fields) > 0:
         st.write("## Filters")
-        for n in range(len(fields)):
-            st.write(f"### Field: {fields[n]}")
-            filters = ss[f'field{i}Filter{n}'] 
+        for field in fields:
+            st.write(f"### Field: {field}")
+            filters = ss[f"groupDict{i}"][field]
             if len(filters) > 0:
-                st.write(sorted(filters))
+                st.write(filters)
             else:
                 st.write("No items filtered for this field")
 

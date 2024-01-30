@@ -40,14 +40,16 @@ def filterDataframe(i):
     # Make a copy of the data
     df = st.session_state.df.clone()
 
-    # Start subsetting...
-    for n in range(len(st.session_state[f'fields{i}'])):
-        # Skip if nothing was selected for a field
-        if len(st.session_state[f"field{i}Filter{n}"]) == 0:
+    # Filter Criteria
+    dictionary = st.session_state[f"groupDict{i}"]
+    fields = st.session_state[f"fields"]
+
+    # Start subsetting
+    for field in fields:
+        # If nothing was selected to filter, skip
+        if len(dictionary[field]) == 0:
             continue
-
-        # Otherwise get the field and filter the data
-        field = st.session_state[f"fields{i}"][n]
-        df = df.filter(pl.col(field).is_in(st.session_state[f"field{i}Filter{n}"]))
-
+        # Otherwise apply the filter
+        else:
+            df = df.filter(pl.col(field).is_in(dictionary[field]))
     return df
