@@ -12,18 +12,17 @@ import polars as pl
 import altair as alt
 import os
 
+# Wide page config
+st.set_page_config(layout = 'wide')
+
 def main():
     # Debugging...
     # st.write(st.session_state)
-
-    # Initialize failure
-    if 'failure' not in st.session_state:
-        st.session_state.failure = False
     
     # Upload a file
     st.file_uploader("Upload a file", key = 'upload')
 
-    if st.session_state.upload and not st.session_state.failure:
+    if st.session_state.upload:
         # Try to read in the data
         try:
             df = pl.read_csv(st.session_state.upload)

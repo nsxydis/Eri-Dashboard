@@ -18,11 +18,35 @@ def main():
     # Identify our base variables
     baseVars = [var for var in ss.df.columns if associatedQuestion(var) == 'baseVar']
 
-    # Sidebar
+    # Page options
     with st.sidebar:
-        # Filter options
-        st.markdown("---")
-        ph.filter()
+        st.slider("Groups to plot", 1, 5, key = 'numGroups')
+
+        for i in range(1, ss.numGroups + 1):
+            # Headings
+            st.markdown("###")
+            st.write(f"# Group {i}")
+            st.markdown("###")
+            st.write('# Plotting Data')
+            # Field to separate by
+            key = f'primaryField{i}'
+            ph.ss(key, "None")
+            primaryColumns = ["None"] + ss.df.columns.copy()
+            st.selectbox("Primary Breakdown Field", options = primaryColumns, key = key, index = primaryColumns.index(ss[key]))
+                
+            # Secondary Plots
+            if ss[key]:
+                secondaryColumns = ss.df.columns.copy()
+                if ss[key] != "None":
+                    secondaryColumns.remove(ss[key])
+                secondaryColumns = ['None'] + secondaryColumns
+                key = f'secondaryField{i}'
+                ph.ss(key, "None")
+                st.selectbox("Secondary Breakdown Field", options = secondaryColumns, key = key, index = secondaryColumns.index(ss[key]))
+
+            # Filters
+            st.markdown("---") # Horizontal Line
+            ph.filter(i)
 
     # Filter the dataframe
     df = ph.filterDataframe()
