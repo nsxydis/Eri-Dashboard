@@ -35,8 +35,11 @@ def main():
         st.markdown("---")
         for i in range(1, ss.numGroups + 1):
             # Headings
-            st.write(f"# Group {i}")
-            st.markdown("###")
+            ph.ss(f'group{i}Name', f"Group {i}")
+            st.write("# " + ss[f"group{i}Name"])
+
+            # Get the Group name
+            st.text_input(f'Group {i} Name', key = f'group{i}Name', value = ss[f'group{i}Name'])
 
             # Make a groupDict, if needed
             ph.ss(f'groupDict{i}', {})
@@ -44,6 +47,7 @@ def main():
             # Dataframe filtering
             filter(i)
             st.markdown("---")
+        st.form_submit_button("Apply Groupings! ")
 
 def filter(i):
     '''Code to write the data filter options on the sidebar'''

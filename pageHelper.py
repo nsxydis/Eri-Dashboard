@@ -39,10 +39,11 @@ def ss(variable, value = None):
     if variable not in st.session_state:
         st.session_state[variable] = value
 
-def filterDataframe(i):
+def filterDataframe(i, df = None):
     '''Filters the dataframe based on the current session_state'''
-    # Make a copy of the data
-    df = st.session_state.df.clone()
+    if type(df) == type(None):
+        # Make a copy of the data
+        df = st.session_state.df.clone()
 
     # Filter Criteria
     dictionary = st.session_state[f"groupDict{i}"]

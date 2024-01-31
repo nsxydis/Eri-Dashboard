@@ -18,41 +18,8 @@ def main():
     # Identify our base variables
     baseVars = [var for var in ss.df.columns if associatedQuestion(var) == 'baseVar']
 
-    # Page options
-    with st.sidebar:
-        st.slider("Groups to plot", 1, 5, key = 'numGroups')
-
-        for i in range(1, ss.numGroups + 1):
-            # Headings
-            st.markdown("###")
-            st.write(f"# Group {i}")
-            st.markdown("###")
-            st.write('# Plotting Data')
-            # Field to separate by
-            key = f'primaryField{i}'
-            ph.ss(key, "None")
-            primaryColumns = ["None"] + ss.df.columns.copy()
-            st.selectbox("Primary Breakdown Field", options = primaryColumns, key = key, index = primaryColumns.index(ss[key]))
-                
-            # Secondary Plots
-            if ss[key]:
-                secondaryColumns = ss.df.columns.copy()
-                if ss[key] != "None":
-                    secondaryColumns.remove(ss[key])
-                secondaryColumns = ['None'] + secondaryColumns
-                key = f'secondaryField{i}'
-                ph.ss(key, "None")
-                st.selectbox("Secondary Breakdown Field", options = secondaryColumns, key = key, index = secondaryColumns.index(ss[key]))
-
-            # Filters
-            st.markdown("---") # Horizontal Line
-            # ph.filter(i)
-
-    # Filter the dataframe
-    df = ph.filterDataframe()
-    
     # Melt the dataframe
-    df = df.melt(id_vars = baseVars)
+    df = ss.df.melt(id_vars = baseVars)
 
     # Find the associated questions
     df = df.with_columns(pl.col('variable').map_elements(lambda x: associatedQuestion(x)).alias('question'))
@@ -60,43 +27,61 @@ def main():
     # Figure out which items are scale variables
     df = df.with_columns(pl.col('variable').str.ends_with('scale').alias('scale'))
 
-    # Selection tool
-    selection = alt.selection_point(fields = ['question'])
-    
-    # Plot the scale
-    scaleChart = alt.Chart(df.to_pandas()).mark_bar().encode(
-        x = 'variable',
+    # Page options
+    with st.sidebar:
+        # Get all the possible questions
+        questions = df[['question']].unique()
+        
+        # Remove base variables and scale items
+        questions = questions.filter(pl.col('question').str.ends_with('baseVar') == False)
+        questions = questions.filter(pl.col('question').str.ends_with('scale') == False)
+        questions = questions['question'].unique().to_list()
+        print(questions)
+
+        # Ask the user which question they'd like to view
+        ph.ss('question', questions[0])
+        index = questions.index(ss['question'])
+        st.selectbox('Display Question', options = questions, key = 'question', index = index)
+
+    # Group results + Add group name
+    for i in range(1, ss.numGroups + 1):
+        dfGroup = ph.filterDataframe(i, df = df)
+        dfGroup = dfGroup.with_columns(pl.col(dfGroup.columns[0]).map_elements(lambda x: ss[f'group{i}Name']).alias('group'))
+        
+        # Combine the groups or create the join dataframe
+        if i == 1:
+            dfJoin = dfGroup
+        else:
+            dfJoin = dfJoin.vstack(dfGroup)
+
+    # Plot the scale data
+    chart = alt.Chart(dfJoin.to_pandas()).mark_bar().encode(
+        x = 'group',
         y = 'count()',
         color = 'value',
-        tooltip = [
-            'variable',
-            'count()',
-            'question'
-        ]
-    ).add_params(selection
+        column = 'question'
     ).transform_filter(
         alt.datum.scale == True
     )
+    st.altair_chart(chart, theme = None)
 
-    # Make the questions chart
-    questionChart = alt.Chart(df.to_pandas()).mark_bar().encode(
+    # Filter for the question of interest
+    dfJoin = dfJoin.filter(pl.col('question') == ss['question'])
+
+    # Plot each of the filter groups together
+    chart = alt.Chart(dfJoin.to_pandas()).mark_bar().encode(
         x = 'count()',
+        y = 'group',
         color = 'value',
-        row = 'variable',
-        tooltip = [
-            'variable',
-            'question',
-            'count()',
-            'value'
-        ]
+        row = 'variable'
     ).transform_filter(
-        selection,
+        alt.datum.question == ss['question']
     ).transform_filter(
         alt.datum.scale == False
     )
+    st.altair_chart(chart, theme = None)
 
-    st.altair_chart(alt.vconcat(scaleChart, questionChart).resolve_scale(color = 'independent'), theme = None)
-    st.dataframe(df)
+
 
 def associatedQuestion(variable):
     '''Returns the question for a given column name variable
@@ -121,7 +106,7 @@ def associatedQuestion(variable):
         return "baseVar"
     else:
         return string
-    
+ 
 if __name__ == "__main__":
     main()
 

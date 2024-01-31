@@ -18,10 +18,7 @@ def main():
     with st.sidebar:
         for i in range(1, ss.numGroups + 1):
             # Headings
-            st.markdown("###")
-            st.write(f"# Group {i}")
-            st.markdown("###")
-            st.write('# Plotting Data')
+            st.write(f"# {ss[f'group{i}Name']}")
             # Field to separate by
             key = f'primaryField{i}'
             ph.ss(key, "None")
@@ -62,7 +59,7 @@ def mainChart(i):
     st.markdown("---")
 
     # Header
-    st.write(f"# Group {i}")
+    st.write(f"# {ss[f'group{i}Name']}")
 
     # Display data filters
     fields = ss[f"fields"]
@@ -90,7 +87,14 @@ def mainChart(i):
 
     # If there is not enough data in a filter, stop executing
     if len(df) < 10:
-        string = f"There is not enough data for Group {i} ({len(df)} results; Need at least 10). "
+        string = ""
+        if ss[f'group{i}Name'] != f'Group {i}':
+            string = f"({ss[f'group{i}Name']}) "
+        if len(df) > 1:
+            s = 's'
+        else:
+            s = ''
+        string = f"There is not enough data for Group {i} {string}({len(df)} result{s}; Need at least 10). "
         string += "Please select more data to see the results."
         st.error(string)
         return 2
