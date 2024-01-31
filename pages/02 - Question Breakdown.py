@@ -24,9 +24,6 @@ def main():
     # Find the associated questions
     df = df.with_columns(pl.col('variable').map_elements(lambda x: associatedQuestion(x)).alias('question'))
 
-    # Figure out which items are scale variables
-    df = df.with_columns(pl.col('variable').str.ends_with('scale').alias('scale'))
-
     # Page options
     with st.sidebar:
         # Get all the possible questions
@@ -36,6 +33,7 @@ def main():
         questions = questions.filter(pl.col('question').str.ends_with('baseVar') == False)
         questions = questions.filter(pl.col('question').str.ends_with('scale') == False)
         questions = questions['question'].unique().to_list()
+        questions = sorted(questions, key = str.casefold)
 
         # Ask the user which question they'd like to view
         ph.ss('question', questions[0])
@@ -67,17 +65,31 @@ def main():
         x = 'group',
         y = 'count()',
         color = 'value:N',
-        column = 'question:N'
+        column = 'variable:N',
+        tooltip = [
+            'group',
+            'count()',
+            'variable',
+            'value'
+        ]
     ).transform_filter(
-        alt.datum.scale == True
+        alt.datum.question == 'scale'
     )
     st.altair_chart(chart, theme = None)
 
     # Filter for the question of interest
     dfJoin = dfJoin.filter(pl.col('question') == ss['question'])
+    dfJoin = dfJoin.filter(pl.col('question') != 'scale')
 
+    if 'details' not in ss:
+        noDetailsPlot(dfJoin)
+    else:
+        detailsPlot(dfJoin)
+
+def noDetailsPlot(df):
+    '''Plot if there are no details provided'''
     # Plot each of the filter groups together
-    chart = alt.Chart(dfJoin.to_pandas()).mark_bar().encode(
+    chart = alt.Chart(df.to_pandas()).mark_bar().encode(
         x = 'count()',
         y = 'group',
         color = 'value:N',
@@ -89,37 +101,60 @@ def main():
             'value'
         ]
     ).transform_filter(
-        alt.datum.question == ss['question']
-    ).transform_filter(
-        alt.datum.scale == False
+        alt.datum.question == st.session_state['question']
     )
     st.altair_chart(chart, theme = None)
 
+def detailsPlot(df):
+    '''Question plots if we do have details'''
+    cols = {}
+
+    questions = sorted(df['variable'].unique().to_list(), key = str.casefold)
+    details = st.session_state.details
+    for question in questions:
+        
+        with st.container():
+            col1, col2, col3 = st.columns(3)
+            info = details.filter(pl.col('item name') == question)
+            with col1:
+                # Write out the question information
+                st.write(f'## {question}')
+                st.write(f"### Prompt: {info['question text'][0]}")
+
+            # Plot the question
+            chart = alt.Chart(df.to_pandas()).mark_bar().encode(
+                x = 'count()',
+                y = 'group',
+                color = 'value:N',
+                tooltip = [
+                    'count()',
+                    'variable',
+                    'group',
+                    'value'
+                ]
+            ).transform_filter(
+                alt.datum.variable == question
+            )
+            with col2:
+                st.altair_chart(chart, theme = None)
+        
+            st.markdown('---')
+        
+        
 
 
 def associatedQuestion(variable):
     '''Returns the question for a given column name variable
-    NOTE: If the variable is not a question, returns baseVar'''
+    NOTE: If the variable is not a question, returns baseVar
+    NOTE: If the variable is a scale value, returns scale'''
 
     a = variable.split('_')
-    string = a[0]
-    baseVar = True
-    for item in a[1:]:
-        if item == 'scale':
-            baseVar = False
-            break
-        
-        if item.isalpha() == False:
-            break
-        else:
-            baseVar = False
-            string += f"_{item}"
-
-    # If there isn't a number or 'scale' found, it's a base var
-    if baseVar:
-        return "baseVar"
+    if a[-1] == 'scale':
+        return 'scale'
+    elif a[-1].isalpha():
+        return 'baseVar'
     else:
-        return string
+        return variable.strip(f'_{a[-1]}')
  
 if __name__ == "__main__":
     main()

@@ -127,7 +127,7 @@ def mainChart(i):
 
         # Secondary chart
         title = [f"Overall Distribution", f"of {ss[secondaryKey]}"]
-        secondary = alt.Chart(df.to_pandas(), title = title).mark_bar().encode(
+        base = alt.Chart(df.to_pandas(), title = title).mark_bar().encode(
             x = f"{ss[secondaryKey]}:N",
             y = 'count()',
             color = f"{ss[secondaryKey]}:N",
@@ -135,14 +135,10 @@ def mainChart(i):
                 ss[secondaryKey],
                 'count()'
             ]
-        ).transform_filter(selection)
-
-        full = alt.Chart(df.to_pandas(), title = title).mark_bar().encode(
-            x = f"{ss[secondaryKey]}:N",
-            y = 'count()',
-            color = f"{ss[secondaryKey]}:N",
-            opacity = alt.value(0.3)
         )
+
+        highlight = base.transform_filter(selection)
+        background = base.encode(opacity = alt.value(0.3))
         
         # Secondary Chart with percentages
         title = ["Distribution of selection", f"for {ss[secondaryKey]}"]
@@ -166,7 +162,7 @@ def mainChart(i):
     if not ss[secondaryKey] or ss[secondaryKey] == 'None':
         st.altair_chart(primary, theme = None)
     else:
-        chart = primary | (secondary + full) | pctSecondary
+        chart = primary | (highlight + background) | pctSecondary
         st.altair_chart(chart.resolve_scale(color = 'independent'), theme = None)
 
 if __name__ == '__main__':

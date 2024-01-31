@@ -19,7 +19,7 @@ def main():
     # Debugging...
     # st.write(st.session_state)
     
-    # Upload a file
+    # Upload a data file
     st.file_uploader("Upload a file", key = 'upload')
 
     if st.session_state.upload:
@@ -36,6 +36,25 @@ def main():
         except:
             st.session_state.failure = True
             st.write("Could not read uploaded file!")
+            st.write("Please refresh the page and try again.")
+
+    # Upload a details file
+    st.file_uploader("Upload a details file (optional)", key = 'detailsUpload')
+
+    if st.session_state.detailsUpload:
+        # Try to read in the data
+        try:
+            file = st.session_state.detailsUpload
+            if file.name.endswith('.csv'):
+                details = pl.read_csv(file)
+            else:
+                details = pl.read_excel(file)
+
+            st.session_state.details = details
+            st.write("File read in succesfully!")
+        except:
+            st.session_state.failure = True
+            st.write("Could not read uploaded details file!")
             st.write("Please refresh the page and try again.")
 
     # How to use this app details below...
