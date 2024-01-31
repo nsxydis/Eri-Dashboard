@@ -81,7 +81,12 @@ def main():
         x = 'count()',
         y = 'group',
         color = 'value:N',
-        row = 'variable'
+        row = 'variable',
+        tooltip = [
+            'count()',
+            'variable',
+            'value'
+        ]
     ).transform_filter(
         alt.datum.question == ss['question']
     ).transform_filter(
