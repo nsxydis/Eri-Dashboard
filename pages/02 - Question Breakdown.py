@@ -36,7 +36,6 @@ def main():
         questions = questions.filter(pl.col('question').str.ends_with('baseVar') == False)
         questions = questions.filter(pl.col('question').str.ends_with('scale') == False)
         questions = questions['question'].unique().to_list()
-        print(questions)
 
         # Ask the user which question they'd like to view
         ph.ss('question', questions[0])
@@ -44,8 +43,17 @@ def main():
         st.selectbox('Display Question', options = questions, key = 'question', index = index)
 
     # Group results + Add group name
+    ph.ss('numGroups', 1)
     for i in range(1, ss.numGroups + 1):
         dfGroup = ph.filterDataframe(i, df = df)
+        
+        # Init if needed
+        ph.ss(f'group{i}Name', f'Group {i}')
+
+        # If we got an error, skip filtering
+        if type(dfGroup) == type(123) and dfGroup > 0:
+            dfGroup = df
+
         dfGroup = dfGroup.with_columns(pl.col(dfGroup.columns[0]).map_elements(lambda x: ss[f'group{i}Name']).alias('group'))
         
         # Combine the groups or create the join dataframe
@@ -58,8 +66,8 @@ def main():
     chart = alt.Chart(dfJoin.to_pandas()).mark_bar().encode(
         x = 'group',
         y = 'count()',
-        color = 'value',
-        column = 'question'
+        color = 'value:N',
+        column = 'question:N'
     ).transform_filter(
         alt.datum.scale == True
     )
@@ -72,7 +80,7 @@ def main():
     chart = alt.Chart(dfJoin.to_pandas()).mark_bar().encode(
         x = 'count()',
         y = 'group',
-        color = 'value',
+        color = 'value:N',
         row = 'variable'
     ).transform_filter(
         alt.datum.question == ss['question']

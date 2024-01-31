@@ -14,14 +14,18 @@ def main():
     # Shorthand
     ss = st.session_state
     
-    # Number of groups we want to filter and plot
-    ph.ss('numGroups', 1)
-    st.slider("Groups to plot", 1, 5, key = 'numGroups', value = ss['numGroups'])
+    with st.form('groupCount&Fields'):
+        # Number of groups we want to filter and plot
+        ph.ss('numGroups', 1)
+        st.slider("Groups to plot", 1, 5, key = 'numGroups', value = ss['numGroups'])
 
-    # Fields we want to filter for each group
-    fieldKey = 'fields'
-    ph.ss(fieldKey, [])
-    st.multiselect("Filter Fields", options = ss.df.columns, key = fieldKey, default = ss[fieldKey])
+        # Fields we want to filter for each group
+        fieldKey = 'fields'
+        ph.ss(fieldKey, [])
+        st.multiselect("Filter Fields", options = ss.df.columns, key = fieldKey, default = ss[fieldKey])
+
+        # Button
+        st.form_submit_button("Set Number of Groups and Fields", on_click = submit)
     
     # Stop if we don't have anything to filter
     if len(st.session_state[fieldKey]) == 0:
@@ -63,6 +67,11 @@ def filter(i):
     for key in ss.fields:
         values = st.multiselect(f"Filter {key}", options = ss.df[key].unique().to_list(), key = f'jambox{key}{i}', default = dictionary[key])
         dictionary[key] = values
+
+def submit():
+    fieldKey = 'fields'
+    st.session_state[fieldKey] = st.session_state[fieldKey]
+    st.session_state.numGroups = st.session_state.numGroups
 
 if __name__ == '__main__':
     main()

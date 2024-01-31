@@ -16,8 +16,10 @@ def main():
 
     # Page options
     with st.sidebar:
+        ph.ss('numGroups', 1)
         for i in range(1, ss.numGroups + 1):
             # Headings
+            ph.ss(f'group{i}Name', f'Group {i}')
             st.write(f"# {ss[f'group{i}Name']}")
             # Field to separate by
             key = f'primaryField{i}'
@@ -62,6 +64,7 @@ def mainChart(i):
     st.write(f"# {ss[f'group{i}Name']}")
 
     # Display data filters
+    ph.ss('fields', [])
     fields = ss[f"fields"]
     if len(fields) > 0:
         st.write("## Filters")
@@ -84,6 +87,10 @@ def mainChart(i):
     
     # Filter the dataframe
     df = ph.filterDataframe(i)
+
+    # If there was an error, default to the full dataframe
+    if type(df) == type(123) and df > 0:
+        df = ss.df
 
     # If there is not enough data in a filter, stop executing
     if len(df) < 10:

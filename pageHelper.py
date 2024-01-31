@@ -46,15 +46,27 @@ def filterDataframe(i, df = None):
         df = st.session_state.df.clone()
 
     # Filter Criteria
-    dictionary = st.session_state[f"groupDict{i}"]
+    try:
+        dictionary = st.session_state[f"groupDict{i}"]
+    except:
+        return 2
     fields = st.session_state[f"fields"]
+
+    # If we don't have any fields, return
+    if len(fields) == 0:
+        return 1
 
     # Start subsetting
     for field in fields:
-        # If nothing was selected to filter, skip
-        if len(dictionary[field]) == 0:
+        try:
+            # If nothing was selected to filter, skip
+            if len(dictionary[field]) == 0:
+                continue
+            # Otherwise apply the filter
+            else:
+                df = df.filter(pl.col(field).is_in(dictionary[field]))
+        
+        # If there isn't a dictionary field that means the filters weren't set yet
+        except:
             continue
-        # Otherwise apply the filter
-        else:
-            df = df.filter(pl.col(field).is_in(dictionary[field]))
     return df
