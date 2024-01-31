@@ -122,7 +122,8 @@ def detailsPlot(df):
 
                 # If we didn't get any data, we're missing the prompt
                 if len(info) > 0:
-                    st.write(f"### Prompt: {info['question text'][0]}")
+                    st.write(f"### Prompt:")
+                    st.write(f"{info['question text'][0]}")
 
             # Plot the question
             chart = alt.Chart(df.to_pandas()).mark_bar().encode(
