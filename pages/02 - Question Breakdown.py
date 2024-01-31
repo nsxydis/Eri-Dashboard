@@ -85,6 +85,7 @@ def main():
         tooltip = [
             'count()',
             'variable',
+            'group',
             'value'
         ]
     ).transform_filter(
