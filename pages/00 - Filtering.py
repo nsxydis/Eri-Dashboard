@@ -16,18 +16,13 @@ def main():
     
     with st.form('groupCount&Fields'):
         # Number of groups we want to filter and plot
-        if 'numGroups' in ss:
-            st.slider("Groups to plot", 1, 5, key = 'numGroups', value = ss['numGroups'])
-        else:
-            st.slider("Groups to plot", 1, 5, key = 'numGroups')
+        ph.ss('numGroups', 1)
+        st.slider("Groups to plot", 1, 5, key = 'numGroups')
 
         # Fields we want to filter for each group
         fieldKey = 'fields'
-        if fieldKey in ss:
-            st.multiselect("Filter Fields", options = ss.df.columns, key = fieldKey, default = ss[fieldKey])
-        else:
-            st.multiselect("Filter Fields", options = ss.df.columns, key = fieldKey)
-
+        ph.ss(fieldKey, [])
+        st.multiselect("Filter Fields", options = ss.df.columns, key = fieldKey)
 
         # Button
         st.form_submit_button("Set Number of Groups and Fields", on_click = submit)
