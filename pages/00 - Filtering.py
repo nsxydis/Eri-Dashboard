@@ -16,8 +16,10 @@ def main():
     
     with st.form('groupCount&Fields'):
         # Number of groups we want to filter and plot
-        ph.ss('numGroups', 1)
-        st.slider("Groups to plot", 1, 5, key = 'numGroups', value = ss['numGroups'])
+        if 'numGroups' in ss:
+            st.slider("Groups to plot", 1, 5, key = 'numGroups', value = ss['numGroups'])
+        else:
+            st.slider("Groups to plot", 1, 5, key = 'numGroups')
 
         # Fields we want to filter for each group
         fieldKey = 'fields'
