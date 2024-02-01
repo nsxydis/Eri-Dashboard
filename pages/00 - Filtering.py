@@ -35,7 +35,7 @@ def main():
     
     # Filter form
     with st.form("filterGroups"):
-        st.form_submit_button("Apply Groupings!")
+        st.form_submit_button("Apply Groupings!", on_click = submit2)
         st.markdown("---")
         for i in range(1, ss.numGroups + 1):
             # Headings
@@ -51,7 +51,7 @@ def main():
             # Dataframe filtering
             filter(i)
             st.markdown("---")
-        st.form_submit_button("Apply Groupings! ")
+        st.form_submit_button("Apply Groupings! ", on_click = submit2)
 
 def filter(i):
     '''Code to write the data filter options on the sidebar'''
@@ -65,8 +65,21 @@ def filter(i):
 
     # Filter options
     for key in ss.fields:
-        values = st.multiselect(f"Filter {key}", options = ss.df[key].unique().to_list(), key = f'jambox{key}{i}', default = dictionary[key])
-        dictionary[key] = values
+        ph.ss('keyFields', [])
+        ss.keyFields.append([key, i])
+        ph.ss(f"jambox{key}{i}", [])
+        st.multiselect(f"Filter {key}", options = ss.df[key].unique().to_list(), 
+                       key = f'jambox{key}{i}',
+                       default = ss[f'jambox{key}{i}']
+        )
+        
+def submit2():
+    ss = st.session_state
+    for key in ss.keyFields:
+        i = key[1]
+        key = key[0]
+        ss[f'groupDict{i}'][key] = ss[f'jambox{key}{i}']
+
 
 def submit():
     fieldKey = 'fields'
