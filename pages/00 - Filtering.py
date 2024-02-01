@@ -23,8 +23,11 @@ def main():
 
         # Fields we want to filter for each group
         fieldKey = 'fields'
-        ph.ss(fieldKey, [])
-        st.multiselect("Filter Fields", options = ss.df.columns, key = fieldKey, default = ss[fieldKey])
+        if fieldKey in ss:
+            st.multiselect("Filter Fields", options = ss.df.columns, key = fieldKey, default = ss[fieldKey])
+        else:
+            st.multiselect("Filter Fields", options = ss.df.columns, key = fieldKey)
+
 
         # Button
         st.form_submit_button("Set Number of Groups and Fields", on_click = submit)
