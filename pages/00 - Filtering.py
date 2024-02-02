@@ -17,14 +17,12 @@ def main():
     with st.form('groupCount&Fields'):
         # Number of groups we want to filter and plot
         ph.ss('numGroups', 1)
-        a = ss.numGroups
-        st.slider("Groups to plot", 1, 5, key = 'numGroups', value = a)
+        st.slider("Groups to plot", 1, 5, key = 'numGroups', default = ss['numGroups'])
 
         # Fields we want to filter for each group
         fieldKey = 'fields'
         ph.ss(fieldKey, [])
-        b = ss[fieldKey]
-        st.multiselect("Filter Fields", options = ss.df.columns, key = fieldKey, default = b)
+        st.multiselect("Filter Fields", options = ss.df.columns, key = fieldKey, default = ss[fieldKey])
 
         # Button
         st.form_submit_button("Set Number of Groups and Fields", on_click = submit)
@@ -92,7 +90,12 @@ if __name__ == '__main__':
     main()
     # Each page needs this for the session state to persist
     for k, v in st.session_state.items():
+        print(k, v)
+        for nono in ['FormSubmitter']:
+            if nono in k:
+                continue
         try:
             st.session_state[k] = v
         except:
             pass
+    
