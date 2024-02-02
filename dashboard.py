@@ -33,6 +33,10 @@ def main():
             ]
             st.session_state.df = df
             st.write("File read in succesfully!")
+            st.write("# Data Overview")
+            pd = df.describe().to_pandas()
+            pd.set_index('describe', inplace=True)
+            st.dataframe(pd)
         except:
             st.session_state.failure = True
             st.write("Could not read uploaded file!")

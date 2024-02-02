@@ -24,6 +24,15 @@ def main():
     # Find the associated questions
     df = df.with_columns(pl.col('variable').map_elements(lambda x: associatedQuestion(x)).alias('question'))
 
+    # Filter out null and missing data from the melt
+    # NOTE: This assumes all your data is numeric!
+    df = df.filter(
+        (pl.col('value').is_not_null()) &
+        (pl.col('value').str.strip_chars() != "")
+    )
+    df = df.cast({'value' : int})
+    df = df.filter(pl.col('value') >= 0)
+
     # Page options
     with st.sidebar:
         # Get all the possible questions
@@ -52,34 +61,53 @@ def main():
         if type(dfGroup) == type(123) and dfGroup > 0:
             dfGroup = df
 
-        dfGroup = dfGroup.with_columns(pl.col(dfGroup.columns[0]).map_elements(lambda x: ss[f'group{i}Name']).alias('group'))
-        
+        if len(dfGroup) > 0:
+            dfGroup = dfGroup.with_columns(pl.col(dfGroup.columns[0]).map_elements(lambda x: ss[f'group{i}Name']).alias('group'))
+        else:
+            st.error(f"No data found for {ss[f'group{i}Name']}")
+            continue
+
+        # Check for null data
+        if len(dfGroup['group'].is_null()) > 0:
+            st.warning(f"Null data detected in {ss[f'group{i}Name']} and filtered from the results")
+            dfGroup = dfGroup.filter(pl.col('group').is_not_null())
+
+        # Aggregate the data        
+        dfGroup = dfGroup.group_by(
+            ['group', 'variable', 'question']
+        ).agg([
+            (pl.col('value').sum() / pl.col('value').count()).alias('value'),
+            (pl.col('value').count()).alias('total')
+        ])
+
         # Combine the groups or create the join dataframe
         if i == 1:
             dfJoin = dfGroup
         else:
             dfJoin = dfJoin.vstack(dfGroup)
 
-    # Plot the scale data
-    chart = alt.Chart(dfJoin.to_pandas()).mark_bar().encode(
+    # Clean up memory
+    del df, dfGroup
+
+    # Make the scale chart
+    title = "Nice chart"
+    chart = alt.Chart(dfJoin.to_pandas(), title = title).mark_bar().encode(
         x = 'group',
-        y = 'count()',
-        color = 'value:N',
-        column = 'variable:N',
+        y = alt.Y('value', scale = alt.Scale(domain = [0, 1])),
+        color = 'group',
+        column = 'variable',
         tooltip = [
             'group',
-            'count()',
             'variable',
-            'value'
+            alt.Tooltip('value', title = 'Percent', format='.2%'),
+            'total'
         ]
     ).transform_filter(
-        alt.datum.question == 'scale'
+        alt.datum.question == 'scale',
+    ).transform_filter(
+        alt.datum.total >= 10
     )
     st.altair_chart(chart, theme = None)
-
-    # Filter for the question of interest
-    dfJoin = dfJoin.filter(pl.col('question') == ss['question'])
-    dfJoin = dfJoin.filter(pl.col('question') != 'scale')
 
     if 'details' not in ss:
         noDetailsPlot(dfJoin)
@@ -90,24 +118,29 @@ def noDetailsPlot(df):
     '''Plot if there are no details provided'''
     # Plot each of the filter groups together
     chart = alt.Chart(df.to_pandas()).mark_bar().encode(
-        x = 'count()',
+        x = alt.X('value', scale = alt.Scale(domain = [0, 1])),
         y = 'group',
-        color = 'value:N',
+        color = 'group',
         row = 'variable',
         tooltip = [
-            'count()',
+            alt.Tooltip('value', title = 'Percent', format = '.2%'),
             'variable',
             'group',
-            'value'
+            'total'
         ]
     ).transform_filter(
         alt.datum.question == st.session_state['question']
+    ).transform_filter(
+        alt.datum.total >= 10
     )
     st.altair_chart(chart, theme = None)
 
 def detailsPlot(df):
     '''Question plots if we do have details'''
     cols = {}
+
+    # Filter for the question we're looking at
+    df = df.filter(pl.col('question') == st.session_state['question'])
 
     questions = sorted(df['variable'].unique().to_list(), key = str.casefold)
     details = st.session_state.details
@@ -127,25 +160,23 @@ def detailsPlot(df):
 
             # Plot the question
             chart = alt.Chart(df.to_pandas()).mark_bar().encode(
-                x = 'count()',
+                x = alt.X('value', scale = alt.Scale(domain = [0, 1])),
                 y = 'group',
-                color = 'value:N',
+                color = 'group',
+                row = 'variable',
                 tooltip = [
-                    'count()',
+                    alt.Tooltip('value', title = 'Percent', format = '.2%'),
                     'variable',
                     'group',
-                    'value'
+                    'total'
                 ]
             ).transform_filter(
-                alt.datum.variable == question
+                alt.datum.total >= 10
             )
             with col2:
                 st.altair_chart(chart, theme = None)
         
             st.markdown('---')
-        
-        
-
 
 def associatedQuestion(variable):
     '''Returns the question for a given column name variable
