@@ -41,6 +41,7 @@ def main():
             st.session_state.failure = True
             st.write("Could not read uploaded file!")
             st.write("Please refresh the page and try again.")
+            raise
 
     # Upload a details file
     st.file_uploader("Upload a details file (optional)", key = 'detailsUpload')
