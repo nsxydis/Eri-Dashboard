@@ -90,10 +90,6 @@ if __name__ == '__main__':
     main()
     # Each page needs this for the session state to persist
     for k, v in st.session_state.items():
-        print(k, v)
-        for nono in ['FormSubmitter']:
-            if nono in k:
-                continue
         try:
             st.session_state[k] = v
         except:
