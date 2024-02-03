@@ -34,9 +34,13 @@ def main():
             st.session_state.df = df
             st.write("File read in succesfully!")
             st.write("# Data Overview")
-            st.dataframe(df.describe())
-            pd = df.describe().to_pandas()
-            pd.set_index('describe', inplace=True)
+
+            pd = df.describe()
+            if 'describe' in pd.columns:
+                pd = pd.rename({'describe' : 'statistic'})
+
+            pd = pd.to_pandas()
+            pd.set_index('statistic', inplace=True)
             st.dataframe(pd)
         except:
             st.session_state.failure = True
