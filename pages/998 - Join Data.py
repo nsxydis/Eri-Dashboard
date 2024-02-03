@@ -30,9 +30,30 @@ def main():
 
         # Check if we have options that aren't being joined on
         if len(by) > 0 and len(by) < len(options):
-            st.warning("You have columns with the same name in both datasets! Joining in this state may result in renamed columns.")
-        if st.button('Join'):
-            try:
+            string = "You have columns with the same name in both datasets! It" +\
+                " is recommended to use all matching columns when joining, or " +\
+                "removing them from one of the datasets. Joining in the current " +\
+                "state will result in renamed columns."
+            st.warning(string)
+        if 'continue' not in st.session_state:
+            st.session_state['continue'] = None
+        if st.button('Join') or st.session_state['continue']:
+            if df1[by].schema != df2[by].schema and not st.session_state['continue']:
+                # Warning message
+                st.warning("The datatypes for the selected columns don't match! You may not get the results you expect if you continue.")
+                
+                # Show the user the datatypes of the columns they're trying to merge
+                st.write("# Dataset 1 Schema:")
+                st.write(df1[by].schema)
+                st.write("# Dataset 2 Schema:")
+                st.write(df2[by].schema)
+
+                if not st.button("Continue?", key = 'continue'):
+                    return 1
+                    
+
+            # If we're modifying the datasets, do so
+            if st.session_state['continue']:
                 # Shenanigans to get the column types to match
                 df1 = pl.concat([df1, df2[by][0]], how = 'diagonal_relaxed')
                 df1 = df1[:len(df1) - 1]
@@ -41,6 +62,7 @@ def main():
                 df2 = pl.concat([df2, df1[by][0]], how = 'diagonal_relaxed')
                 df2 = df2[:len(df2) - 1]
                 
+            try:
                 # Join the data frames
                 df = df1.join(df2, on = by)
                 st.write("# View or download your data")
