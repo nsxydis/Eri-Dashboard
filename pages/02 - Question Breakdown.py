@@ -93,7 +93,7 @@ def main():
     title = "Nice chart"
     chart = alt.Chart(dfJoin.to_pandas(), title = title).mark_bar().encode(
         x = 'group',
-        y = alt.Y('value', scale = alt.Scale(domain = [0, 1])),
+        y = alt.Y('value', scale = alt.Scale(domain = [0, 1]), axis = alt.Axis(format = '%')),
         color = 'group',
         column = 'variable',
         tooltip = [
@@ -118,7 +118,7 @@ def noDetailsPlot(df):
     '''Plot if there are no details provided'''
     # Plot each of the filter groups together
     chart = alt.Chart(df.to_pandas()).mark_bar().encode(
-        x = alt.X('value', scale = alt.Scale(domain = [0, 1])),
+        x = alt.X('value', scale = alt.Scale(domain = [0, 1]), axis = alt.Axis(format = '%')),
         y = 'group',
         color = 'group',
         row = 'variable',
@@ -147,7 +147,7 @@ def detailsPlot(df):
     
     # Make the main chart we want to display
     chart = alt.Chart(df.to_pandas()).mark_bar().encode(
-        x = alt.X('value', scale = alt.Scale(domain = [0, 1])),
+        x = alt.X('value', scale = alt.Scale(domain = [0, 1]), axis = alt.Axis(format = '%')),
         y = 'group',
         color = 'group',
         row = 'variable',
