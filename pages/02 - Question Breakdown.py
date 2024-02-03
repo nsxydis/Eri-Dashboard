@@ -97,10 +97,10 @@ def main():
         color = 'group',
         column = 'variable',
         tooltip = [
+            alt.Tooltip('variable', title = 'Question'),
             'group',
-            'variable',
-            alt.Tooltip('value', title = 'Percent', format='.2%'),
-            'total'
+            alt.Tooltip('value', title = 'Percent', format = '.2%'),
+            alt.Tooltip('total', title = "Responses")
         ]
     ).transform_filter(
         alt.datum.question == 'scale',
@@ -123,10 +123,10 @@ def noDetailsPlot(df):
         color = 'group',
         row = 'variable',
         tooltip = [
-            alt.Tooltip('value', title = 'Percent', format = '.2%'),
-            'variable',
+            alt.Tooltip('variable', title = 'Question'),
             'group',
-            'total'
+            alt.Tooltip('value', title = 'Percent', format = '.2%'),
+            alt.Tooltip('total', title = "Responses")
         ]
     ).transform_filter(
         alt.datum.question == st.session_state['question']
@@ -144,6 +144,24 @@ def detailsPlot(df):
 
     questions = sorted(df['variable'].unique().to_list(), key = str.casefold)
     details = st.session_state.details
+    
+    # Make the main chart we want to display
+    chart = alt.Chart(df.to_pandas()).mark_bar().encode(
+        x = alt.X('value', scale = alt.Scale(domain = [0, 1])),
+        y = 'group',
+        color = 'group',
+        row = 'variable',
+        tooltip = [
+            alt.Tooltip('variable', title = 'Question'),
+            'group',
+            alt.Tooltip('value', title = 'Percent', format = '.2%'),
+            alt.Tooltip('total', title = "Responses")
+        ]
+    ).transform_filter(
+        # Only show results that have more than 10 responses
+        alt.datum.total >= 10
+    )
+
     for question in questions:
         
         with st.container():
@@ -159,22 +177,11 @@ def detailsPlot(df):
                     st.write(f"{info['question text'][0]}")
 
             # Plot the question
-            chart = alt.Chart(df.to_pandas()).mark_bar().encode(
-                x = alt.X('value', scale = alt.Scale(domain = [0, 1])),
-                y = 'group',
-                color = 'group',
-                row = 'variable',
-                tooltip = [
-                    alt.Tooltip('value', title = 'Percent', format = '.2%'),
-                    'variable',
-                    'group',
-                    'total'
-                ]
-            ).transform_filter(
-                alt.datum.total >= 10
+            display = chart.transform_filter(
+                alt.datum.variable == question
             )
             with col2:
-                st.altair_chart(chart, theme = None)
+                st.altair_chart(display, theme = None)
         
             st.markdown('---')
 

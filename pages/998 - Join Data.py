@@ -33,6 +33,15 @@ def main():
             st.warning("You have columns with the same name in both datasets! Joining in this state may result in renamed columns.")
         if st.button('Join'):
             try:
+                # Shenanigans to get the column types to match
+                df1 = pl.concat([df1, df2[by][0]], how = 'diagonal_relaxed')
+                df1 = df1[:len(df1) - 1]
+                
+                # Repeat for df2
+                df2 = pl.concat([df2, df1[by][0]], how = 'diagonal_relaxed')
+                df2 = df2[:len(df2) - 1]
+                
+                # Join the data frames
                 df = df1.join(df2, on = by)
                 st.write("# View or download your data")
                 st.dataframe(df)
@@ -42,7 +51,7 @@ def main():
     
     elif join == 'stack':
         try:
-            df = pl.concat([df1, df2], how = 'vertical_relaxed')
+            df = pl.concat([df1, df2], how = 'diagonal_relaxed')
             st.write("# View or download your data")
             st.dataframe(df)
         except:
